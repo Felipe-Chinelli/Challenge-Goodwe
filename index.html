@@ -1,3 +1,5 @@
+--- START OF FILE index.html ---
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -32,6 +34,8 @@
             <h2>Gerenciar Dispositivos</h2>
             <p>Clique no botão para adicionar um novo dispositivo à sua rede.</p>
             <button id="btnAbrirModal" class="blue-btn" style="margin-top: 10px;">Adicionar Novo Dispositivo</button>
+            <!-- NOVO: Botão para acessar o Chatbot -->
+            <button id="btnAbrirChatbot" class="blue-btn" style="margin-top: 10px;">Falar com o Assistente</button>
         </div>
 
         <!-- MODAL DE CADASTRO (Pop-up): Inicialmente oculto -->
@@ -144,6 +148,7 @@
     const formEdicao = document.getElementById("formEditarDispositivo");
     const btnFecharModalEdicao = modalEdicao.querySelector('.close-btn-edit');
     const btnExcluirDispositivo = document.getElementById('btnExcluirDispositivo');
+    const btnAbrirChatbot = document.getElementById('btnAbrirChatbot'); // NOVO: Referência ao botão do chatbot
 
 
     // ===================================================================================
@@ -158,6 +163,12 @@
         if (usuarioAtual) {
             usuarioAtual.dispositivos = dispositivos;
             usuarioAtual.limiteOtimizacao = parseInt(limiteOtimizacaoInputEl.value);
+            // NOVO: Salva o estado atual da bateria no objeto do usuário
+            usuarioAtual.nivelBateriaKWh = nivelBateriaKWh;
+            usuarioAtual.estadoBateria = estadoBateria;
+            usuarioAtual.modoOperacao = modoOperacao;
+            usuarioAtual.maxBateriaKWh = maxBateriaKWh; // Opcional, se maxBateriaKWh for fixo para todos
+
             localStorage.setItem('contas', JSON.stringify(contas));
         }
     }
@@ -176,9 +187,17 @@
             // Carrega o limite de otimização salvo, ou usa 50% como padrão
             limiteOtimizacaoInputEl.value = usuarioAtual.limiteOtimizacao || 50;
 
+            // NOVO: Carrega o estado da bateria do usuário, ou usa valores padrão
+            nivelBateriaKWh = usuarioAtual.nivelBateriaKWh !== undefined ? usuarioAtual.nivelBateriaKWh : 0;
+            estadoBateria = usuarioAtual.estadoBateria || 'carregando';
+            modoOperacao = usuarioAtual.modoOperacao || 'concessionaria';
+            // maxBateriaKWh permanece global e fixo neste exemplo
+
             // Atualiza a interface com os dados carregados
             atualizarLista();
             atualizarConsumoTotal();
+            atualizarDisplayBateria(); // Atualiza o display da bateria com os valores carregados
+            atualizarBotaoModo(); // Atualiza o botão de modo com o modo carregado
         }
     }
 
@@ -203,10 +222,12 @@
                     nivelBateriaKWh = maxBateriaKWh;
                     estadoBateria = 'cheia';
                 }
+            } else {
+                estadoBateria = 'cheia'; // Garante que o estado seja 'cheia' quando está no máximo
             }
         } else { // modoOperacao === 'bateria'
             if (nivelBateriaKWh > 0) {
-                nivelBateriaKWh -= (consumoAtual / 2); // Descarga baseada no consumo
+                nivelBateriaKWh -= (consumoAtual / 2); // Descarga baseada no consumo (a cada 2s)
                 estadoBateria = 'descarregando';
                 if (nivelBateriaKWh <= 0) {
                     nivelBateriaKWh = 0;
@@ -218,9 +239,12 @@
                     mensagemDiv.textContent = "Bateria esgotada! Dispositivos desligados.";
                     mensagemDiv.style.color = "#dc3545";
                 }
+            } else {
+                estadoBateria = 'vazia'; // Garante que o estado seja 'vazia' quando está em 0
             }
         }
         
+        salvarDadosDoUsuario(); // Salva o estado da bateria a cada simulação
         atualizarDisplayBateria();
 
         // Lógica de verificação para otimização automática
@@ -251,6 +275,7 @@
         for (const prioridade of [3, 2, 1]) {
             const paraDesligar = dispositivos.filter(d => d.importancia === prioridade && d.ligado);
             if (paraDesligar.length > 0) {
+                // Desliga todos os dispositivos de menor importância encontrados
                 paraDesligar.forEach(d => { d.ligado = false; });
                 acoesRealizadas.push(`importância ${prioridade}`);
                 otimizacaoFeita = true;
@@ -315,7 +340,19 @@
     btnVerificarConsumo.addEventListener("click", () => otimizarConsumo(true));
 
     // Alterna entre os modos de operação (concessionária/bateria)
-    btnMudarModoEl.addEventListener('click', () => { if (modoOperacao === 'concessionaria') { if (nivelBateriaKWh <= 0) { alert("Bateria vazia! Não é possível mudar para este modo."); return; } modoOperacao = 'bateria'; } else { modoOperacao = 'concessionaria'; } atualizarBotaoModo(); });
+    btnMudarModoEl.addEventListener('click', () => { 
+        if (modoOperacao === 'concessionaria') { 
+            if (nivelBateriaKWh <= 0) { 
+                alert("Bateria vazia! Não é possível mudar para este modo."); 
+                return; 
+            } 
+            modoOperacao = 'bateria'; 
+        } else { 
+            modoOperacao = 'concessionaria'; 
+        } 
+        salvarDadosDoUsuario(); // Salva o novo modo de operação
+        atualizarBotaoModo(); 
+    });
     
     // Controles para abrir e fechar os modais (pop-ups)
     btnAbrirModalCadastro.addEventListener('click', () => modalCadastro.style.display = 'flex');
@@ -332,15 +369,18 @@
     // Lida com a exclusão de um dispositivo
     btnExcluirDispositivo.addEventListener('click', () => { const id = document.getElementById('dispositivoIdEdit').value; if (confirm('Tem certeza que deseja excluir este dispositivo?')) { dispositivos = dispositivos.filter(d => d.id != id); salvarDadosDoUsuario(); atualizarLista(); atualizarConsumoTotal(); modalEdicao.style.display = 'none'; } });
 
+    // NOVO: Abre a página do chatbot
+    btnAbrirChatbot.addEventListener('click', () => {
+        window.location.href = 'chatbot.html';
+    });
+
 
     // ===================================================================================
     // SEÇÃO 6: INICIALIZAÇÃO DA PÁGINA
     // ===================================================================================
     
     // Roda as funções necessárias para configurar o estado inicial da aplicação
-    carregarDadosDoUsuario();
-    atualizarBotaoModo();
-    atualizarDisplayBateria();
+    carregarDadosDoUsuario(); // Carrega os dados, incluindo o estado da bateria
     setInterval(simularBateria, 2000); // Inicia o "motor" da bateria
     setInterval(atualizarRelogio, 1000); // Inicia o relógio
     buscarClima(); // Busca os dados do clima
