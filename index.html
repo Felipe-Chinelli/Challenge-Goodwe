@@ -1,18 +1,14 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <!-- Configurações básicas do documento -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Gerenciamento de Energia</title>
-    <!-- Link para a folha de estilos CSS -->
     <link rel="stylesheet" href="./css/index.css">
 </head>
 <body>
-    <!-- Container principal que envolve toda a aplicação -->
     <div class="wrapper">
         
-        <!-- CABEÇALHO: Título, botão de deslogar e display de informações -->
         <header style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
             <div>
                 <h1>Gerenciamento de Energia</h1>
@@ -27,16 +23,16 @@
             </div>
         </header>
 
-        <!-- SEÇÃO DE CONTROLE: Botão para abrir o modal de cadastro -->
         <div class="grid">
             <h2>Gerenciar Dispositivos</h2>
             <p>Clique no botão para adicionar um novo dispositivo à sua rede.</p>
             <button id="btnAbrirModal" class="blue-btn" style="margin-top: 10px;">Adicionar Novo Dispositivo</button>
             <!-- NOVO: Botão para acessar o Chatbot -->
             <button id="btnAbrirChatbot" class="blue-btn" style="margin-top: 10px;">Falar com o Assistente</button>
+            <!-- NOVO: Botão para acessar o Status de Energia -->
+            <button id="btnVerStatusEnergia" class="blue-btn" style="margin-top: 10px;">Ver Status de Energia</button>
         </div>
 
-        <!-- MODAL DE CADASTRO (Pop-up): Inicialmente oculto -->
         <div id="modalDispositivo" class="modal-overlay">
             <div class="modal-content">
                 <span class="close-btn">&times;</span>
@@ -50,7 +46,6 @@
             </div>
         </div>
 
-        <!-- MODAL DE EDIÇÃO (Pop-up): Inicialmente oculto -->
         <div id="modalEditarDispositivo" class="modal-overlay">
             <div class="modal-content">
                 <span class="close-btn-edit">&times;</span>
@@ -66,41 +61,14 @@
             </div>
         </div>
 
-        <!-- SEÇÃO DA LISTA DE DISPOSITIVOS -->
         <h2>Dispositivos Cadastrados</h2>
         <ul id="listaDispositivos" class="device-list">
             <!-- Os itens da lista serão gerados dinamicamente pelo JavaScript -->
         </ul>
-
-        <!-- SEÇÃO DE STATUS E CONTROLE DE ENERGIA -->
-        <h2>Status de Energia</h2>
-        <div class="status-energia-container">
-            <!-- Controles do modo de operação e display da bateria -->
-            <div class="controles-modo">
-                <button id="btnMudarModo" class="concessionaria">Mudar para Modo Bateria</button>
-                <div class="bateria-container">
-                    <div class="bateria-externa">
-                        <div id="bateria-interna" class="bateria-interna"></div>
-                    </div>
-                </div>
-                <span id="bateria-porcentagem" style="font-size: 20px; font-weight: bold;">0%</span>
-            </div>
-            <!-- Display de consumo total -->
-            <div id="statusConsumo"></div>
-            <!-- Controles de otimização automática e manual -->
-            <div class="gestao-energia">
-                <label for="limiteOtimizacaoInput">Otimizar abaixo de:</label>
-                <input type="number" id="limiteOtimizacaoInput" min="1" max="100" value="50">
-                <span>%</span>
-                <button id="btnSalvarLimite" class="save-btn">Salvar</button>
-                <button id="btnVerificarConsumo" class="blue-btn">Otimizar Manualmente</button>
-            </div>
-            <!-- Área de mensagens para o usuário -->
-            <div id="mensagem" style="margin-top: 10px; font-weight: bold;"></div>
-        </div>
+        
+        <!-- REMOVIDO: A seção de Status de Energia foi movida para status_energia.html -->
     </div>
 
-    <!-- Novo link para o JavaScript externo -->
     <script src="./js/index.js"></script>
 </body>
 </html>
