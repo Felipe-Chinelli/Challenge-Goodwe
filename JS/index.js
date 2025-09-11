@@ -97,7 +97,7 @@ function atualizarRelogio() { relogioEl.textContent = new Date().toLocaleTimeStr
 
 /** Busca e exibe os dados do clima da localização do usuário. */
 function buscarClima() { 
-    const apiKey = 'ada296919b44270c0c40096a950c3729'; /* Substitua pela sua chave */ 
+    const apiKey = 'OPEN_WEATHER_API_KEY'; /* Substitua pela sua chave */ 
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition( 
             (position) => { 
